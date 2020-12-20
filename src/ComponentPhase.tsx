@@ -21,9 +21,12 @@ type GetComponentType = (
 type AsyncReturnType = [ComponentType, () => Promise<void>];
 type SyncReturnType = [ComponentType, () => void];
 
+type UseAsyncArgs = Omit<Parameters<typeof useAsync>[0], "phase">;
+type UseSyncArgs = Omit<Parameters<typeof useSync>[0], "phase">;
+
 export const useAsync = (props: {
-  callback: () => Promise<ComponentType | null>;
   phase: ComponentPhase;
+  callback: () => Promise<ComponentType | null>;
   deps: DependencyList;
   opts?: Options;
 }): AsyncReturnType => {
@@ -104,5 +107,33 @@ export class ComponentPhase {
     } else {
       console.error(err);
     }
+  }
+
+  createUseAsync() {
+    return (
+      callback: UseAsyncArgs["callback"],
+      deps: UseAsyncArgs["deps"],
+      opts?: UseAsyncArgs["opts"],
+    ) =>
+      useAsync({
+        callback,
+        deps,
+        opts,
+        phase: this,
+      });
+  }
+
+  createUseSync() {
+    return (
+      callback: UseSyncArgs["callback"],
+      deps: UseSyncArgs["deps"],
+      opts?: UseSyncArgs["opts"],
+    ) =>
+      useSync({
+        callback,
+        deps,
+        opts,
+        phase: this,
+      });
   }
 }
