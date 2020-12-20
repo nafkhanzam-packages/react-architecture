@@ -1,0 +1,22 @@
+{
+  "name": "@nafkhanzam/react-architecture",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "repository": "https://github.com/nafkhanzam/react-architecture.git",
+  "author": "nafkhanzam <nafkhanalzamzami@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "bugs": {
+    "url": "https://github.com/nafkhanzam/react-architecture/issues"
+  },
+  "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
+  "dependencies": {
+    "react": "^17.0.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "eslint": "^7.16.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.3"
+  }
+}
