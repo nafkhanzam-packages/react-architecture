@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "lib/index.js",
   "types": "src/index.ts",
   "repository": "https://github.com/nafkhanzam/react-architecture.git",
@@ -15,6 +15,7 @@
   },
   "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
   "scripts": {
+    "prepublish": "yarn build",
     "build": "tsc"
   },
   "dependencies": {
