@@ -1,8 +1,8 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "lib/index.js",
-  "types": "src/index.ts",
+  "types": "lib/index.d.ts",
   "repository": "https://github.com/nafkhanzam/react-architecture.git",
   "author": "nafkhanzam <nafkhanalzamzami@gmail.com>",
   "license": "MIT",
