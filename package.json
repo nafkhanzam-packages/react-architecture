@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": "https://github.com/nafkhanzam/react-architecture.git",
@@ -21,7 +21,7 @@
     "prepublish": "yarn build",
     "build": "tsc"
   },
-  "dependencies": {
+  "peerDependencies": {
     "react": "^17.0.1"
   },
   "devDependencies": {
