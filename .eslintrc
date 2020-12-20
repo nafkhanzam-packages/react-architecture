@@ -10,6 +10,12 @@
     "quotes": [2, "double"],
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",
+    "react-hooks/exhaustive-deps": [
+      "warn",
+      {
+        "additionalHooks": "(useAsync|useSync)"
+      }
+    ],
     "@typescript-eslint/no-unused-vars": [2, {"args": "after-used", "argsIgnorePattern": "^_"}],
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-empty-function": "off",
