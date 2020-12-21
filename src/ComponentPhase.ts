@@ -31,17 +31,22 @@ export const useAsync = (props: {
   opts?: Options;
 }): AsyncReturnType => {
   const [component, setComponent] = useState<ComponentType | null>(null);
-  const [status, setStatus] = useState(Status.LOADING);
+  const [status, setStatus] = useState<Status>(Status.LOADING);
   const refreshingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   const refresh = useCallback(async () => {
-    if (refreshingRef.current) {
+    if (refreshingRef.current || !mountedRef.current) {
       return;
     }
     try {
       refreshingRef.current = true;
       setStatus(Status.LOADING);
       const comp = await props.callback();
+      if (!mountedRef.current) {
+        return;
+      }
+      console.log("Got component!", comp);
       setStatus(Status.DONE);
       setComponent(comp);
     } catch (err) {
@@ -51,11 +56,22 @@ export const useAsync = (props: {
       refreshingRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, props.deps);
+  }, [props, ...props.deps]);
 
   useEffect(() => {
     refresh();
-  }, [refresh]);
+    return () => {
+      console.log("Unmounting Async!", refreshingRef.current, mountedRef.current);
+      mountedRef.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...props.deps]);
+
+  // useEffect(() => {
+  //   refreshingRef.current = false;
+  //   refresh();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, props.deps);
 
   return [props.phase.getComponent(status, component, props.opts), refresh];
 };
@@ -74,8 +90,7 @@ export const useSync = (props: {
       props.phase.onError(err);
       return props.phase.getComponent(Status.ERROR, null, props.opts);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, props.deps);
+  }, [props]);
 
   const [comp, setComp] = useState(load());
 
@@ -102,11 +117,7 @@ export class ComponentPhase {
   };
 
   onError(err: unknown) {
-    if (this.defaults.onError) {
-      this.defaults.onError(err);
-    } else {
-      console.error(err);
-    }
+    (this.defaults.onError ?? console.error)(err);
   }
 
   createUseAsync() {

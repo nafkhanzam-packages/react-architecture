@@ -13,7 +13,7 @@ export const StringAuthProvider: React.FC = (props) => {
   return (
     <AuthProvider<ContextType>
       BaseAuthProvider={BaseStringAuthProvider}
-      getSavedLogged={async () => ({token: ""})}
+      getSavedLogged={async () => ({token: "default-token"})}
       saveLogged={async (_logged) => {}}
       onError={console.error}>
       {props.children}
