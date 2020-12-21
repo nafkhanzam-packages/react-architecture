@@ -1,9 +1,13 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.28",
+  "version": "0.0.30",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "repository": "https://github.com/nafkhanzam/react-architecture.git",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com:nafkhanzam/react-architecture.git",
+    "directory": "@nafkhanzam/react-architecture"
+  },
   "author": "nafkhanzam <nafkhanalzamzami@gmail.com>",
   "license": "MIT",
   "private": false,
@@ -14,7 +18,7 @@
     "url": "https://github.com/nafkhanzam/react-architecture/issues"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/nafkhanzam"
   },
   "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
   "scripts": {

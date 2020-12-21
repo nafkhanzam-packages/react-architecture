@@ -11,6 +11,16 @@ export type AuthContext<LoggedType> = {
   logged: LoggedType | null;
 };
 
+export type LoggedAuthContext<LoggedType> = {
+  actions: Action<LoggedType>;
+  logged: LoggedType;
+};
+
+export type AuthFC<LoggedType, Props> = React.FC<{auth: AuthContext<LoggedType>} & Props>;
+export type LoggedAuthFC<LoggedType, Props> = React.FC<
+  {auth: LoggedAuthContext<LoggedType>} & Props
+>;
+
 export const AuthProvider = <LoggedType,>(
   props: PropsWithChildren<{
     BaseAuthProvider: Provider<AuthContext<LoggedType> | undefined>;
@@ -59,7 +69,7 @@ export const AuthProvider = <LoggedType,>(
 export const createWithAuthContextWrapper = <Props extends unknown, LoggedType>(
   useAsync: ReturnType<ComponentPhase["createUseAsync"]>,
   useAuthContext: () => AuthContext<LoggedType> | undefined,
-) => (Component: React.FC<{auth: AuthContext<LoggedType>} & Props>): React.FC<Props> => (props) => {
+) => (Component: AuthFC<LoggedType, Props>): React.FC<Props> => (props) => {
   const authContext = useAuthContext();
 
   const [comp] = useAsync(async () => {
@@ -75,18 +85,19 @@ export const createWithAuthContextWrapper = <Props extends unknown, LoggedType>(
 export const createWithLoggedAuthContextWrapper = <Props extends unknown, LoggedType>(
   useAsync: ReturnType<ComponentPhase["createUseAsync"]>,
   useAuthContext: () => AuthContext<LoggedType> | undefined,
-  onNotLogged: () => Promise<ReactElement>,
-) => (Component: React.FC<{auth: AuthContext<LoggedType>} & Props>): React.FC<Props> => (props) => {
+  onNotLogged: () => Promise<ReactElement | null>,
+) => (Component: LoggedAuthFC<LoggedType, Props>): React.FC<Props> => (props) => {
   const authContext = useAuthContext();
 
   const [comp] = useAsync(async () => {
     if (!authContext) {
       return null;
     }
-    if (!authContext.logged) {
+    const {logged} = authContext;
+    if (!logged) {
       return await onNotLogged();
     }
-    return <Component auth={authContext} {...props} />;
+    return <Component auth={{...authContext, logged}} {...props} />;
   }, [authContext, props]);
 
   return comp;
