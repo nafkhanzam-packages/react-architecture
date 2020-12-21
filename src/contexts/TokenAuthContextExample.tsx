@@ -1,9 +1,11 @@
 import {createHandledContext} from "./createHandledContext";
-import {AuthProvider, Context} from "./BaseAuthContext";
+import {AuthProvider, AuthContext} from "./BaseAuthContext";
 
 type ContextType = {token: string};
 
-const [BaseStringAuthProvider, useStringAuthContext] = createHandledContext<Context<ContextType>>();
+const [BaseStringAuthProvider, useStringAuthContext] = createHandledContext<
+  AuthContext<ContextType>
+>();
 
 export {useStringAuthContext};
 
