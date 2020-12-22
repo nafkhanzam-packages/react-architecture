@@ -1,11 +1,4 @@
-import React, {
-  PropsWithChildren,
-  Provider,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import React, {PropsWithChildren, Provider, useCallback, useEffect, useState} from "react";
 import {ComponentPhase} from "../ComponentPhase";
 
 type Action<LoggedType> = {
@@ -41,7 +34,6 @@ export const AuthProvider = <LoggedType,>(
   const login = useCallback(
     async (logged: LoggedType) => {
       await props.saveLogged(logged);
-      console.log("Set logged!!");
       setLogged(logged);
     },
     [props],
@@ -57,7 +49,6 @@ export const AuthProvider = <LoggedType,>(
         const retrievedLogged = await props.getSavedLogged();
         setLogged(retrievedLogged);
       } catch (err: unknown) {
-        (props.onError ?? console.error)(err);
         logout();
       }
     })();
@@ -65,43 +56,44 @@ export const AuthProvider = <LoggedType,>(
 
   const actions: Action<LoggedType> = {login, logout};
   const context: AuthContext<LoggedType> = {actions, logged};
+
   return <props.BaseAuthProvider value={context}>{props.children}</props.BaseAuthProvider>;
 };
 
 export const createWithAuthContextWrapper = <LoggedType,>(
-  useAsync: ReturnType<ComponentPhase["createUseAsync"]>,
+  phase: ComponentPhase,
   useAuthContext: () => AuthContext<LoggedType> | undefined,
 ) => <Props,>(Component: AuthFC<LoggedType, Props>): React.FC<Props> => (props) => {
   const authContext = useAuthContext();
 
-  console.log("authContext", authContext);
-  const [comp] = useAsync(async () => {
+  const [comp] = phase.useAsync(async () => {
     if (!authContext) {
       return null;
     }
     return <Component auth={authContext} {...props} />;
-  }, [authContext, props]);
+  }, [authContext]);
 
   return comp;
 };
 
 export const createWithLoggedAuthContextWrapper = <LoggedType,>(
-  useAsync: ReturnType<ComponentPhase["createUseAsync"]>,
+  phase: ComponentPhase,
   useAuthContext: () => AuthContext<LoggedType> | undefined,
-  onNotLogged: () => Promise<ReactElement | null>,
+  onNotLogged: () => Promise<void>,
 ) => <Props,>(Component: LoggedAuthFC<LoggedType, Props>): React.FC<Props> => (props) => {
   const authContext = useAuthContext();
 
-  const [comp] = useAsync(async () => {
+  const [comp] = phase.useAsync(async () => {
     if (!authContext) {
       return null;
     }
     const {logged} = authContext;
     if (!logged) {
-      return await onNotLogged();
+      await onNotLogged();
+      return null;
     }
     return <Component auth={{...authContext, logged}} {...props} />;
-  }, [authContext, props]);
+  }, [authContext]);
 
   return comp;
 };

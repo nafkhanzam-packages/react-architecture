@@ -11,7 +11,7 @@ type Options = {
   errorComponent?: ComponentType;
 };
 
-type ComponentType = ReactElement;
+type ComponentType = ReactElement | null;
 type GetComponentType = (
   status: Status,
   doneComponent: ComponentType | null,
@@ -21,71 +21,60 @@ type GetComponentType = (
 type AsyncReturnType = [ComponentType, () => Promise<void>];
 type SyncReturnType = [ComponentType, () => void];
 
-type UseAsyncArgs = Omit<Parameters<typeof useAsync>[0], "phase">;
-type UseSyncArgs = Omit<Parameters<typeof useSync>[0], "phase">;
+type UseAsyncArgs = Omit<AsyncProps, "phase">;
+type UseSyncArgs = Omit<SyncProps, "phase">;
 
-export const useAsync = (props: {
+type AsyncProps = {
   phase: ComponentPhase;
-  callback: () => Promise<ComponentType | null>;
+  getComponent: () => Promise<ComponentType | null>;
   deps: DependencyList;
   opts?: Options;
-}): AsyncReturnType => {
-  const [component, setComponent] = useState<ComponentType | null>(null);
-  const [status, setStatus] = useState<Status>(Status.LOADING);
+};
+
+export const useAsync = (props: AsyncProps): AsyncReturnType => {
+  const [comp, setComp] = useState<ComponentType>(
+    props.phase.getComponent(Status.LOADING, null, props.opts),
+  );
   const refreshingRef = useRef(false);
-  const mountedRef = useRef(true);
+  // const mountedRef = useRef(true);
 
   const refresh = useCallback(async () => {
-    if (refreshingRef.current || !mountedRef.current) {
+    if (refreshingRef.current) {
       return;
     }
     try {
+      setComp(props.phase.getComponent(Status.LOADING, null, props.opts));
       refreshingRef.current = true;
-      setStatus(Status.LOADING);
-      const comp = await props.callback();
-      if (!mountedRef.current) {
-        return;
-      }
-      console.log("Got component!", comp);
-      setStatus(Status.DONE);
-      setComponent(comp);
+      const component = await props.getComponent();
+      setComp(props.phase.getComponent(Status.DONE, component, props.opts));
     } catch (err) {
       props.phase.onError(err);
-      setStatus(Status.ERROR);
+      setComp(props.phase.getComponent(Status.ERROR, null, props.opts));
     } finally {
       refreshingRef.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props, ...props.deps]);
+  }, props.deps);
 
   useEffect(() => {
     refresh();
-    return () => {
-      console.log("Unmounting Async!", refreshingRef.current, mountedRef.current);
-      mountedRef.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...props.deps]);
+  }, [refresh]);
 
-  // useEffect(() => {
-  //   refreshingRef.current = false;
-  //   refresh();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, props.deps);
-
-  return [props.phase.getComponent(status, component, props.opts), refresh];
+  return [comp, refresh];
 };
 
-export const useSync = (props: {
-  callback: () => ComponentType;
+type SyncProps = {
   phase: ComponentPhase;
+  getComponent: () => ComponentType | null;
   deps: DependencyList;
   opts?: Options;
-}): SyncReturnType => {
+};
+
+export const useSync = (props: SyncProps): SyncReturnType => {
   const load = useCallback(() => {
     try {
-      const comp = props.callback();
-      return props.phase.getComponent(Status.DONE, comp, props.opts);
+      const component = props.getComponent();
+      return props.phase.getComponent(Status.DONE, component, props.opts);
     } catch (err) {
       props.phase.onError(err);
       return props.phase.getComponent(Status.ERROR, null, props.opts);
@@ -117,34 +106,34 @@ export class ComponentPhase {
   };
 
   onError(err: unknown) {
-    (this.defaults.onError ?? console.error)(err);
+    (this.onError ?? console.error)(err);
   }
 
-  createUseAsync() {
-    return (
-      callback: UseAsyncArgs["callback"],
-      deps: UseAsyncArgs["deps"],
-      opts?: UseAsyncArgs["opts"],
-    ) =>
-      useAsync({
-        callback,
-        deps,
-        opts,
-        phase: this,
-      });
+  useAsync(
+    getData: UseAsyncArgs["getComponent"],
+    deps: UseAsyncArgs["deps"],
+    opts?: UseAsyncArgs["opts"],
+  ) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useAsync({
+      getComponent: getData,
+      deps,
+      opts,
+      phase: this,
+    });
   }
 
-  createUseSync() {
-    return (
-      callback: UseSyncArgs["callback"],
-      deps: UseSyncArgs["deps"],
-      opts?: UseSyncArgs["opts"],
-    ) =>
-      useSync({
-        callback,
-        deps,
-        opts,
-        phase: this,
-      });
+  useSync(
+    getData: UseSyncArgs["getComponent"],
+    deps: UseSyncArgs["deps"],
+    opts?: UseSyncArgs["opts"],
+  ) {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useSync({
+      getComponent: getData,
+      deps,
+      opts,
+      phase: this,
+    });
   }
 }
