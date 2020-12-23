@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -40,6 +40,9 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.13.2",
-    "axios": "^0.21.1"
+    "axios": "^0.21.1",
+    "big-roman": "^1.0.1",
+    "get-age": "^1.0.1",
+    "moment": "^2.29.1"
   }
 }
