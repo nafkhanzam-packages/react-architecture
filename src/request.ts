@@ -29,7 +29,7 @@ export const toFormData = (obj: Record<string, string | number | boolean>) => {
   return res;
 };
 
-export const apiClient = {
+export const apiUtils = {
   exec,
   get: async (url: string, opts?: Omit<Opt, "body">) => exec("GET", url, opts),
   post: async (url: string, opts?: Opt) => exec("POST", url, opts),
@@ -39,18 +39,18 @@ export const apiClient = {
 export class ApiClient {
   constructor(public auth: string) {}
   async exec(method: Method, url: string, opts?: Opt) {
-    return (await apiClient.exec(method, url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.exec(method, url, {auth: this.auth, ...opts})).data;
   }
 
   async get(url: string, opts?: Omit<Opt, "body">) {
-    return (await apiClient.get(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.get(url, {auth: this.auth, ...opts})).data;
   }
 
   async post(url: string, opts?: Opt) {
-    return (await apiClient.post(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.post(url, {auth: this.auth, ...opts})).data;
   }
 
   async put(url: string, opts?: Opt) {
-    return (await apiClient.put(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.put(url, {auth: this.auth, ...opts})).data;
   }
 }
