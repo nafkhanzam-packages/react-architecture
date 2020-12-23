@@ -51,9 +51,7 @@ export class Storage<StorageType extends {[key: string]: Type}> {
     const result = {} as NullableValue<Pick<StorageType, K>>;
     for (const [key, value] of entries) {
       const k = key as keyof Pick<StorageType, K>;
-      if (keys.includes(k)) {
-        result[k] = value === null ? null : JSON.parse(value);
-      }
+      result[k] = value === null ? null : JSON.parse(value);
     }
 
     return result;
