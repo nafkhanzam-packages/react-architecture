@@ -6,7 +6,7 @@ type BodyType = Record<string, unknown>;
 type Opt = {
   authorization?: string;
   query?: QueryType;
-  body?: BodyType;
+  body?: BodyType | FormData;
 };
 
 const exec = async (method: Method, url: string, opts?: Opt) =>
@@ -16,8 +16,10 @@ const exec = async (method: Method, url: string, opts?: Opt) =>
       url,
       headers: {
         Authorization: opts?.authorization,
+        "Content-Type": opts?.body instanceof FormData ? "multipart/form-data" : "application/json",
       },
       params: opts?.query,
+      data: opts?.body,
     })
   ).data;
 
