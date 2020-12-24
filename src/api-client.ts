@@ -37,7 +37,7 @@ export const apiUtils = {
 };
 
 export class ApiClient {
-  constructor(public auth: string) {}
+  constructor(public auth?: string) {}
   async exec(method: Method, url: string, opts?: Opt) {
     return (await apiUtils.exec(method, url, {auth: this.auth, ...opts})).data;
   }
