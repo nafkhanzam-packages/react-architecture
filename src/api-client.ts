@@ -39,20 +39,30 @@ export const apiUtils = {
 };
 
 export class ApiClient {
-  constructor(public authorization?: string) {}
+  constructor(public baseUrl: string, public authorization?: string) {}
   async exec(method: Method, url: string, opts?: Opt) {
-    return (await apiUtils.exec(method, url, {authorization: this.authorization, ...opts})).data;
+    return (
+      await apiUtils.exec(method, this.toUrl(url), {authorization: this.authorization, ...opts})
+    ).data;
   }
 
   async get(url: string, opts?: Omit<Opt, "body">) {
-    return (await apiUtils.get(url, {authorization: this.authorization, ...opts})).data;
+    return (await apiUtils.get(this.toUrl(url), {authorization: this.authorization, ...opts})).data;
   }
 
   async post(url: string, opts?: Opt) {
-    return (await apiUtils.post(url, {authorization: this.authorization, ...opts})).data;
+    return (await apiUtils.post(this.toUrl(url), {authorization: this.authorization, ...opts}))
+      .data;
   }
 
   async put(url: string, opts?: Opt) {
-    return (await apiUtils.put(url, {authorization: this.authorization, ...opts})).data;
+    return (await apiUtils.put(this.toUrl(url), {authorization: this.authorization, ...opts})).data;
+  }
+
+  private toUrl(url: string) {
+    if (url.startsWith("/") && this.baseUrl) {
+      url = this.baseUrl + url;
+    }
+    return url;
   }
 }
