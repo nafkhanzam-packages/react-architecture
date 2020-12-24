@@ -15,6 +15,8 @@ const gqlToTime = (time: string) => moment(time, "HH:mm[:ss]").utc(true).toDate(
 const gqlToDateTime = (date: string, time: string) =>
   moment(`${date} ${time}`, "YYYY-MM-DD HH:mm[:ss]").utc(true).toDate();
 const toRpString = (value: number) => `Rp ${toMoneyString(value)}`;
+const toPricePerUnitString = (price: number, unit: string) =>
+  `Rp ${toMoneyString(price)} / ${unit}`;
 
 export enum ErrorStatus {
   BAD_REQUEST = "BAD_REQUEST",
@@ -43,6 +45,7 @@ export const formats = {
   gqlToDate,
   gqlToTime,
   gqlToDateTime,
+  toPricePerUnitString,
   toAge: (dateStr: string): number => getAge(dateStr),
   numberToRoman: (value: number): string => numberToRoman(value),
   romanToNumber: (str: string): number => romanToNumber(str),
