@@ -4,7 +4,7 @@ type QueryType = Record<string, unknown>;
 type BodyType = Record<string, unknown>;
 
 type Opt = {
-  auth?: string;
+  authorization?: string;
   query?: QueryType;
   body?: BodyType;
 };
@@ -15,7 +15,7 @@ const exec = async (method: Method, url: string, opts?: Opt) =>
       method,
       url,
       headers: {
-        Authorization: opts?.auth,
+        Authorization: opts?.authorization,
       },
       params: opts?.query,
     })
@@ -37,20 +37,20 @@ export const apiUtils = {
 };
 
 export class ApiClient {
-  constructor(public auth?: string) {}
+  constructor(public authorization?: string) {}
   async exec(method: Method, url: string, opts?: Opt) {
-    return (await apiUtils.exec(method, url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.exec(method, url, {authorization: this.authorization, ...opts})).data;
   }
 
   async get(url: string, opts?: Omit<Opt, "body">) {
-    return (await apiUtils.get(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.get(url, {authorization: this.authorization, ...opts})).data;
   }
 
   async post(url: string, opts?: Opt) {
-    return (await apiUtils.post(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.post(url, {authorization: this.authorization, ...opts})).data;
   }
 
   async put(url: string, opts?: Opt) {
-    return (await apiUtils.put(url, {auth: this.auth, ...opts})).data;
+    return (await apiUtils.put(url, {authorization: this.authorization, ...opts})).data;
   }
 }
