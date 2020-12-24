@@ -34,7 +34,7 @@ export class ComponentPhase {
   }
 
   onError(err: unknown) {
-    (this.onError ?? console.error)(err);
+    (this.defaults.onError ?? console.error)(err);
   }
 
   useAsync(
