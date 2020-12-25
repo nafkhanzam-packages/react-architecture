@@ -16,7 +16,7 @@ type Options = {
 
 export class ComponentPhase {
   constructor(
-    private defaults: {
+    public defaults: {
       loadingComponent: ComponentType;
       errorComponent: ComponentType;
       onError?: (err: unknown) => void;
@@ -43,30 +43,23 @@ export class ComponentPhase {
     opts?: Options,
   ): [ComponentType, () => Promise<void>] {
     const [comp, setComp] = useState<ComponentType>(this.getComponent(Status.LOADING, null, opts));
-    const refreshingRef = useRef(false);
     // const mountedRef = useRef(true);
 
     const refresh = useCallback(async () => {
-      if (refreshingRef.current) {
-        return;
-      }
       try {
-        refreshingRef.current = true;
         setComp(this.getComponent(Status.LOADING, null, opts));
         const component = await getComponent();
         setComp(this.getComponent(Status.DONE, component, opts));
       } catch (err) {
         this.onError(err);
         setComp(this.getComponent(Status.ERROR, null, opts));
-      } finally {
-        refreshingRef.current = false;
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
+    }, [getComponent, opts]);
 
     useEffect(() => {
       refresh();
-    }, [refresh]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
 
     return [comp, refresh];
   }
