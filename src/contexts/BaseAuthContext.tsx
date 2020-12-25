@@ -29,6 +29,7 @@ export const AuthProvider = <LoggedType, ContextType>(
     BaseAuthProvider: Provider<AuthContext<LoggedType, ContextType> | undefined>;
     getSavedLogged: () => Promise<LoggedType | null>;
     saveLogged: (logged: LoggedType) => Promise<void>;
+    onLogout: () => Promise<void>;
     onError?: (err: unknown) => void;
     getContext: (logged: LoggedType | null) => ContextType;
   }>,
@@ -38,15 +39,20 @@ export const AuthProvider = <LoggedType, ContextType>(
 
   const login = useCallback(
     async (logged: LoggedType) => {
+      setMounted(false);
       await props.saveLogged(logged);
       setLogged(logged);
+      setMounted(true);
     },
     [props],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    setMounted(false);
+    await props.onLogout();
     setLogged(null);
-  }, []);
+    setMounted(true);
+  }, [props]);
 
   useEffect(() => {
     let unmounted = false;
@@ -62,7 +68,7 @@ export const AuthProvider = <LoggedType, ContextType>(
         if (unmounted) {
           return;
         }
-        logout();
+        await logout();
       }
       setMounted(true);
     })();
@@ -91,7 +97,7 @@ export const createWithAuthContextWrapper = <LoggedType, ContextType>(
 ) => <Props,>(Component: AuthFC<LoggedType, ContextType, Props>): React.FC<Props> => (props) => {
   const authContext = useAuthContext();
 
-  const [comp] = phase.useAsync(async () => {
+  const [comp] = phase.useSync(() => {
     if (!authContext?.mounted) {
       return null;
     }
@@ -104,20 +110,19 @@ export const createWithAuthContextWrapper = <LoggedType, ContextType>(
 export const createWithLoggedAuthContextWrapper = <LoggedType, ContextType>(
   phase: ComponentPhase,
   useAuthContext: () => AuthContext<LoggedType, ContextType> | undefined,
-  onNotLogged: () => Promise<void>,
+  onNotLogged: () => Promise<void> | void,
 ) => <Props,>(Component: LoggedAuthFC<LoggedType, ContextType, Props>): React.FC<Props> => (
   props,
 ) => {
   const authContext = useAuthContext();
 
-  const [comp] = phase.useAsync(async () => {
+  const [comp] = phase.useSync(() => {
     if (!authContext?.mounted) {
       return null;
     }
     const {logged} = authContext;
     if (!logged) {
-      // TODO Change to useSync and without await
-      await onNotLogged();
+      onNotLogged();
       return null;
     }
     return <Component auth={{...authContext, logged}} {...props} />;
