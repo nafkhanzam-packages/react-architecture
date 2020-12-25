@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import {DependencyList, ReactElement, useCallback, useEffect, useRef, useState} from "react";
+import {DependencyList, ReactElement, useCallback, useEffect, useMemo, useState} from "react";
 
 enum Status {
   LOADING,
@@ -64,8 +64,14 @@ export class ComponentPhase {
     return [comp, refresh];
   }
 
-  useSync(getComponent: () => ComponentType | null, deps: DependencyList, opts?: Options) {
-    const load = useCallback(() => {
+  useSync(
+    getComponent: () => ComponentType | null,
+    deps: DependencyList,
+    opts?: Options,
+  ): [ComponentType, () => void] {
+    const [refresh, setRefresh] = useState(false);
+
+    const loadComponent = useCallback(() => {
       try {
         const component = getComponent();
         return this.getComponent(Status.DONE, component, opts);
@@ -73,11 +79,11 @@ export class ComponentPhase {
         this.onError(err);
         return this.getComponent(Status.ERROR, null, opts);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, deps);
+    }, [getComponent, opts]);
 
-    const [comp, setComp] = useState(load());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const comp = useMemo(() => loadComponent(), [...deps, refresh]);
 
-    return [comp, () => setComp(load())];
+    return [comp, () => setRefresh(!refresh)];
   }
 }
