@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.80",
+  "version": "0.0.81",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -26,10 +26,10 @@
     "build": "tsc"
   },
   "peerDependencies": {
-    "react": "^17.0.1"
+    "react": "^16"
   },
   "devDependencies": {
-    "@types/react": "^17.0.0",
+    "@types/react": "^16",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.16.0",
