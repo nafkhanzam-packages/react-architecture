@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.77",
+  "version": "0.0.78",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
