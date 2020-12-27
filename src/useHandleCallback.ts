@@ -8,6 +8,7 @@ export const useHandleCallback = <T extends unknown[]>(
   callback: (...args: T) => FetchCallbackReturn,
   onError: (err: unknown) => void,
   params: T,
+  deps: DependencyList = [],
 ) =>
   useCallback(async () => {
     setLoading?.(true);
@@ -20,7 +21,8 @@ export const useHandleCallback = <T extends unknown[]>(
       onError(error);
     }
     setLoading?.(false);
-  }, [setLoading, callback, onError, params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
 
 export const useHandleCallbackWithArgs = <T extends unknown[]>(
   setLoading: ((loading: boolean) => void) | null,
@@ -41,5 +43,6 @@ export const useHandleCallbackWithArgs = <T extends unknown[]>(
       }
       setLoading?.(false);
     },
-    [setLoading, onError, ...deps], // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    deps,
   );

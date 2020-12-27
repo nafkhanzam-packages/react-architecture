@@ -38,10 +38,10 @@ export const AuthProvider = <LoggedType, ContextType>(
   const [mounted, setMounted] = useState(false);
 
   const login = useCallback(
-    async (logged: LoggedType) => {
+    async (newLogged: LoggedType) => {
       setMounted(false);
-      await props.saveLogged(logged);
-      setLogged(logged);
+      await props.saveLogged(newLogged);
+      setLogged(newLogged);
       setMounted(true);
     },
     [props],
@@ -55,28 +55,19 @@ export const AuthProvider = <LoggedType, ContextType>(
   }, [props]);
 
   useEffect(() => {
-    let unmounted = false;
-
     (async () => {
       try {
         const retrievedLogged = await props.getSavedLogged();
-        if (unmounted) {
-          return;
+        if (retrievedLogged) {
+          setLogged(retrievedLogged);
         }
-        setLogged(retrievedLogged);
       } catch (err: unknown) {
-        if (unmounted) {
-          return;
-        }
         await logout();
       }
       setMounted(true);
     })();
-
-    return () => {
-      unmounted = true;
-    };
-  }, [logout, props]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const contextInstance = useMemo(() => props.getContext(logged), [logged, props]);
 

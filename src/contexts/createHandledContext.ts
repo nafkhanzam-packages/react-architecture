@@ -5,3 +5,18 @@ export const createHandledContext = <ContextType>(defaultValue?: ContextType) =>
 
   return [Context.Provider, () => useContext(Context)] as const;
 };
+
+export const createNonNullContext = <ContextType>(defaultValue?: ContextType) => {
+  const Context = createContext<ContextType | undefined>(defaultValue);
+
+  return [
+    Context.Provider,
+    () => {
+      const value = useContext(Context);
+      if (!value) {
+        throw new Error("Context called but undefined received!");
+      }
+      return value;
+    },
+  ] as const;
+};
