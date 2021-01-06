@@ -23,19 +23,12 @@ const exec = async (method: Method, url: string, opts?: Opt) =>
     })
   ).data;
 
-export const toFormData = (obj: Record<string, string | number | boolean>) => {
-  const res = new FormData();
-  for (const [key, value] of Object.entries(obj)) {
-    res.append(key, value.toString());
-  }
-  return res;
-};
-
 export const apiUtils = {
   exec,
   get: async (url: string, opts?: Omit<Opt, "body">) => exec("GET", url, opts),
   post: async (url: string, opts?: Opt) => exec("POST", url, opts),
   put: async (url: string, opts?: Opt) => exec("PUT", url, opts),
+  delete: async (url: string, opts?: Opt) => exec("DELETE", url, opts),
 };
 
 export class ApiClient {
@@ -57,6 +50,11 @@ export class ApiClient {
 
   async put(url: string, opts?: Opt) {
     return (await apiUtils.put(this.toUrl(url), {authorization: this.authorization, ...opts})).data;
+  }
+
+  async delete(url: string, opts?: Opt) {
+    return (await apiUtils.delete(this.toUrl(url), {authorization: this.authorization, ...opts}))
+      .data;
   }
 
   private toUrl(url: string) {

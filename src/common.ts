@@ -12,8 +12,10 @@ const toDateTimeGQLString = (date: Date) =>
   `${toDateGQLString(date)} ${toHourMinuteGQLString(date)}`;
 const gqlToDate = (date: string) => moment(date, "YYYY-MM-DD").utc(true).toDate();
 const gqlToTime = (time: string) => moment(time, "HH:mm[:ss]").utc(true).toDate();
-const gqlToDateTime = (date: string, time: string) =>
-  moment(`${date} ${time}`, "YYYY-MM-DD HH:mm[:ss]").utc(true).toDate();
+const gqlToDateTime = (dateTime: string, time?: string) =>
+  moment(`${dateTime}${time ? ` ${time}` : ""}`, "YYYY-MM-DD HH:mm[:ss]")
+    .utc(true)
+    .toDate();
 const toRpString = (value: number) => `Rp ${toMoneyString(value)}`;
 const toPricePerUnitString = (price: number, unit: string) => `${toRpString(price)} / ${unit}`;
 
