@@ -1,4 +1,4 @@
-import React, {PropsWithChildren, Provider, useCallback, useEffect, useMemo, useState} from "react";
+import {PropsWithChildren, Provider, useCallback, useEffect, useMemo, useState} from "react";
 import {ComponentPhase} from "../ComponentPhase";
 
 type Action<LoggedType> = {
