@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.96",
+  "version": "0.0.97",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -23,7 +23,9 @@
   "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
   "scripts": {
     "prepublish": "yarn build",
-    "build": "tsc"
+    "build": "tsc",
+    "generate": "ts-node generateExports",
+    "pub": "yarn version --patch && npm pub"
   },
   "peerDependencies": {
     "react": "^16"
@@ -35,6 +37,7 @@
     "eslint": "^7.16.0",
     "eslint-plugin-react": "^7.21.5",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "export-generator": "^1.2.0",
     "prettier": "^2.2.1",
     "typescript": "^4.1.3"
   },
