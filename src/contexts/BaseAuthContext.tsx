@@ -39,20 +39,22 @@ export const AuthProvider = <LoggedType, ContextType>(
 
   const login = useCallback(
     async (newLogged: LoggedType) => {
-      setMounted(false);
       await props.saveLogged(newLogged);
       setLogged(newLogged);
-      setMounted(true);
+      if (mounted) {
+        setMounted(true);
+      }
     },
-    [props],
+    [mounted, props],
   );
 
   const logout = useCallback(async () => {
-    setMounted(false);
     await props.onLogout();
     setLogged(null);
-    setMounted(true);
-  }, [props]);
+    if (mounted) {
+      setMounted(true);
+    }
+  }, [mounted, props]);
 
   useEffect(() => {
     (async () => {
