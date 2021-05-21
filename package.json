@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.107",
+  "version": "0.0.108",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -17,9 +17,6 @@
   "bugs": {
     "url": "https://github.com/nafkhanzam/react-architecture/issues"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/nafkhanzam"
-  },
   "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
   "scripts": {
     "prepublish": "yarn generate && yarn build",
@@ -28,10 +25,10 @@
     "pub": "yarn version --patch && npm pub"
   },
   "peerDependencies": {
-    "react": "^16"
+    "react": "^17"
   },
   "devDependencies": {
-    "@types/react": "^16",
+    "@types/react": "^17",
     "@typescript-eslint/eslint-plugin": "^4.10.0",
     "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.16.0",
