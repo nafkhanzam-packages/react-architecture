@@ -8,26 +8,27 @@ enum Status {
 }
 
 type ComponentType = ReactElement | null;
+type ErrorComponentType = (err: unknown) => ComponentType;
 
 type Options = {
   loadingComponent?: ComponentType;
-  errorComponent?: ComponentType;
+  errorComponent?: ErrorComponentType;
 };
 
 export class ComponentPhase {
   constructor(
     public defaults: {
       loadingComponent: ComponentType;
-      errorComponent: ComponentType;
+      errorComponent: ErrorComponentType;
       onError?: (err: unknown) => void;
     },
   ) {}
 
-  getComponent(status: Status, doneComponent: ComponentType | null, opts?: Options) {
+  getComponent(status: Status, doneComponent: ComponentType | null, opts?: Options, err?: unknown) {
     if (status === Status.LOADING || (status === Status.DONE && doneComponent === null)) {
       return opts?.loadingComponent ?? this.defaults.loadingComponent;
     } else if (status === Status.ERROR || doneComponent === null) {
-      return opts?.errorComponent ?? this.defaults.errorComponent;
+      return opts?.errorComponent?.(err) ?? this.defaults.errorComponent(err);
     } else {
       return doneComponent;
     }
@@ -52,7 +53,7 @@ export class ComponentPhase {
         setComp(this.getComponent(Status.DONE, component, opts));
       } catch (err) {
         this.onError(err);
-        setComp(this.getComponent(Status.ERROR, null, opts));
+        setComp(this.getComponent(Status.ERROR, null, opts, err));
       }
     }, [getComponent, opts]);
 
