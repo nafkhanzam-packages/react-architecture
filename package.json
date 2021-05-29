@@ -1,6 +1,6 @@
 {
   "name": "@nafkhanzam/react-architecture",
-  "version": "0.0.109",
+  "version": "0.0.110",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -22,7 +22,8 @@
     "prepublish": "yarn generate && yarn build",
     "build": "tsc",
     "generate": "ts-node generateExports",
-    "pub": "yarn version --patch && npm pub"
+    "patch": "yarn version --patch",
+    "pub": "npm pub"
   },
   "peerDependencies": {
     "react": "^17"
