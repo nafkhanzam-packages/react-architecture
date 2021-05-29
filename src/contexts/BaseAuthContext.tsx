@@ -27,7 +27,7 @@ export type LoggedAuthFC<LoggedType, ContextType, Props> = React.FC<
 export const AuthProvider = <LoggedType, ContextType>(
   props: PropsWithChildren<{
     BaseAuthProvider: Provider<AuthContext<LoggedType, ContextType> | undefined>;
-    getSavedLogged: () => Promise<LoggedType | null>;
+    getSavedLogged: (ctx: ContextType) => Promise<LoggedType | null>;
     saveLogged: (logged: LoggedType) => Promise<void>;
     onLogout: () => Promise<void>;
     onError?: (err: unknown) => void;
@@ -41,7 +41,7 @@ export const AuthProvider = <LoggedType, ContextType>(
     async (newLogged: LoggedType) => {
       await props.saveLogged(newLogged);
       setLogged(newLogged);
-      if (mounted) {
+      if (!mounted) {
         setMounted(true);
       }
     },
@@ -51,15 +51,17 @@ export const AuthProvider = <LoggedType, ContextType>(
   const logout = useCallback(async () => {
     await props.onLogout();
     setLogged(null);
-    if (mounted) {
+    if (!mounted) {
       setMounted(true);
     }
   }, [mounted, props]);
 
+  const contextInstance = useMemo(() => props.getContext(logged), [logged, props]);
+
   useEffect(() => {
     (async () => {
       try {
-        const retrievedLogged = await props.getSavedLogged();
+        const retrievedLogged = await props.getSavedLogged(contextInstance);
         if (retrievedLogged) {
           setLogged(retrievedLogged);
         }
@@ -70,8 +72,6 @@ export const AuthProvider = <LoggedType, ContextType>(
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const contextInstance = useMemo(() => props.getContext(logged), [logged, props]);
 
   const actions: Action<LoggedType> = {login, logout};
   const context: AuthContext<LoggedType, ContextType> = {

@@ -22,8 +22,7 @@
     "prepublish": "yarn generate && yarn build",
     "build": "tsc",
     "generate": "ts-node generateExports",
-    "patch": "yarn version --patch",
-    "pub": "npm pub"
+    "patch": "yarn version --patch"
   },
   "peerDependencies": {
     "react": "^17"
