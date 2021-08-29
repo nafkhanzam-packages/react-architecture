@@ -77,17 +77,59 @@ export const AsyncComponent = <T,>(props: Props<T>): ReturnNode => {
   }
 };
 
+type PADType<T> =
+  | {
+      type: "promise";
+      value: Promise<AsyncData<T>>;
+    }
+  | {
+      type: "resolved";
+      value: AsyncData<T>;
+    }
+  | {
+      type: "value";
+      value: T;
+    };
+
+export const getPADType = <T,>(v: PAD<T>): PADType<T> => {
+  if (isPromise(v)) {
+    return {
+      type: "promise",
+      value: v,
+    };
+  } else {
+    if (typeof v === "object" && "status" in v) {
+      return {
+        type: "resolved",
+        value: v,
+      };
+    } else {
+      return {
+        type: "value",
+        value: v,
+      };
+    }
+  }
+};
+
 export type PromiseAsyncComponentProps<T> = Omit<Props<T>, "data"> & {
   data: PAD<T>;
 };
 
 export const PromiseAsyncComponent = <T,>(props: PromiseAsyncComponentProps<T>) => {
   let initialData: AsyncData<T> = {status: "loading"};
-  if (!isPromise(props.data)) {
-    if (typeof props.data === "object" && "status" in props.data) {
-      initialData = props.data;
-    } else {
-      initialData = {status: "success", data: props.data};
+  const padt = getPADType(props.data);
+  switch (padt.type) {
+    case "resolved": {
+      initialData = padt.value;
+      break;
+    }
+    case "value": {
+      initialData = {
+        status: "success",
+        data: padt.value,
+      };
+      break;
     }
   }
   const [data, setData] = useState<AsyncData<T>>(initialData);
@@ -102,4 +144,36 @@ export const PromiseAsyncComponent = <T,>(props: PromiseAsyncComponentProps<T>) 
   }, [props.data]);
 
   return <AsyncComponent {...props} data={data} />;
+};
+
+export const padm = <T, R>(pad: PAD<T>, mapFn: (t: T) => R): PAD<R> => {
+  const padt = getPADType(pad);
+  switch (padt.type) {
+    case "promise": {
+      return new Promise<AsyncData<R>>(async (resolve) => {
+        const value = await padt.value;
+        resolve(padm<T, R>(value, mapFn) as AsyncData<R>);
+      });
+    }
+    case "resolved": {
+      switch (padt.value.status) {
+        case "success": {
+          return {
+            status: "success",
+            data: mapFn(padt.value.data),
+          };
+        }
+        case "loading":
+        case "error": {
+          return padt.value;
+        }
+      }
+    }
+    case "value": {
+      return {
+        status: "success",
+        data: mapFn(padt.value),
+      };
+    }
+  }
 };
