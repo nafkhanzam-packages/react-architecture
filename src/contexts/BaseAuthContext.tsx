@@ -1,5 +1,5 @@
 import React, {PropsWithChildren, Provider, useCallback, useEffect, useMemo, useState} from "react";
-import {ComponentPhase} from "../ComponentPhase";
+import {AsyncData} from "../types";
 
 type Action<LoggedType> = {
   login: (logged: LoggedType) => Promise<void>;
@@ -8,21 +8,9 @@ type Action<LoggedType> = {
 
 export type AuthContext<LoggedType, ContextType> = {
   actions: Action<LoggedType>;
-  logged: LoggedType | null;
+  logged: AsyncData<LoggedType | null>;
   context: ContextType;
-  mounted: boolean;
 };
-
-export type LoggedAuthContext<LoggedType, ContextType> = AuthContext<LoggedType, ContextType> & {
-  logged: LoggedType;
-};
-
-export type AuthFC<LoggedType, ContextType, Props> = React.FC<
-  {auth: AuthContext<LoggedType, ContextType>} & Props
->;
-export type LoggedAuthFC<LoggedType, ContextType, Props> = React.FC<
-  {auth: LoggedAuthContext<LoggedType, ContextType>} & Props
->;
 
 export const AuthProvider = <LoggedType, ContextType>(
   props: PropsWithChildren<{
@@ -31,30 +19,31 @@ export const AuthProvider = <LoggedType, ContextType>(
     saveLogged: (logged: LoggedType) => Promise<void>;
     onLogout: () => Promise<void>;
     onError?: (err: unknown) => void;
-    getContext: (logged: LoggedType | null) => ContextType;
+    getContext: (logged: AsyncData<LoggedType | null>) => ContextType;
   }>,
 ) => {
-  const [logged, setLogged] = useState<LoggedType | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const [logged, setLogged] = useState<AsyncData<LoggedType | null>>({
+    status: "loading",
+  });
 
   const login = useCallback(
     async (newLogged: LoggedType) => {
       await props.saveLogged(newLogged);
-      setLogged(newLogged);
-      if (!mounted) {
-        setMounted(true);
-      }
+      setLogged({
+        status: "success",
+        data: newLogged,
+      });
     },
-    [mounted, props],
+    [props],
   );
 
   const logout = useCallback(async () => {
     await props.onLogout();
-    setLogged(null);
-    if (!mounted) {
-      setMounted(true);
-    }
-  }, [mounted, props]);
+    setLogged({
+      status: "success",
+      data: null,
+    });
+  }, [props]);
 
   const contextInstance = useMemo(() => props.getContext(logged), [logged, props]);
 
@@ -62,13 +51,16 @@ export const AuthProvider = <LoggedType, ContextType>(
     (async () => {
       try {
         const retrievedLogged = await props.getSavedLogged(contextInstance);
-        if (retrievedLogged) {
-          setLogged(retrievedLogged);
-        }
+        setLogged({
+          status: "success",
+          data: retrievedLogged,
+        });
       } catch (err: unknown) {
-        await logout();
+        setLogged({
+          status: "error",
+          error: err,
+        });
       }
-      setMounted(true);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -78,48 +70,7 @@ export const AuthProvider = <LoggedType, ContextType>(
     actions,
     logged,
     context: contextInstance,
-    mounted,
   };
 
   return <props.BaseAuthProvider value={context}>{props.children}</props.BaseAuthProvider>;
-};
-
-export const createWithAuthContextWrapper = <LoggedType, ContextType>(
-  phase: ComponentPhase,
-  useAuthContext: () => AuthContext<LoggedType, ContextType> | undefined,
-) => <Props,>(Component: AuthFC<LoggedType, ContextType, Props>): React.FC<Props> => (props) => {
-  const authContext = useAuthContext();
-
-  const [comp] = phase.useSync(() => {
-    if (!authContext?.mounted) {
-      return null;
-    }
-    return <Component auth={authContext} {...props} />;
-  }, [authContext]);
-
-  return comp;
-};
-
-export const createWithLoggedAuthContextWrapper = <LoggedType, ContextType>(
-  phase: ComponentPhase,
-  useAuthContext: () => AuthContext<LoggedType, ContextType> | undefined,
-  onNotLogged: () => Promise<void> | void,
-) => <Props,>(Component: LoggedAuthFC<LoggedType, ContextType, Props>): React.FC<Props> => (
-  props,
-) => {
-  const authContext = useAuthContext();
-
-  const [comp] = phase.useSync(() => {
-    if (!authContext?.mounted) {
-      return null;
-    }
-    const {logged} = authContext;
-    if (!logged) {
-      onNotLogged();
-      return null;
-    }
-    return <Component auth={{...authContext, logged}} {...props} />;
-  }, [authContext]);
-
-  return comp;
 };

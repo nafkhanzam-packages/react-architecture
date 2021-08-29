@@ -1,3 +1,5 @@
+export * from "./async-component";
+export * from "./types";
 export * from "./ComponentPhase";
 export * from "./ConditionalWrap";
 export * from "./contexts/BaseAuthContext";

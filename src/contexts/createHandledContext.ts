@@ -13,7 +13,7 @@ export const createNonNullContext = <ContextType>(defaultValue?: ContextType) =>
     Context.Provider,
     () => {
       const value = useContext(Context);
-      if (!value) {
+      if (value === undefined) {
         throw new Error("Context called but undefined received!");
       }
       return value;

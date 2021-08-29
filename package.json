@@ -20,7 +20,7 @@
   "homepage": "https://github.com/nafkhanzam/react-architecture#readme",
   "scripts": {
     "prepublish": "yarn generate && yarn build",
-    "build": "tsc",
+    "build": "rm lib/*.d.ts; tsc; cp src/*.d.ts lib;",
     "generate": "ts-node generateExports",
     "patch": "yarn version --patch"
   },
@@ -39,6 +39,7 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
+    "@nafkhanzam/common-utils": "../common-utils",
     "axios": "^0.21.1",
     "big-roman": "^1.0.1",
     "get-age": "^1.0.1",
